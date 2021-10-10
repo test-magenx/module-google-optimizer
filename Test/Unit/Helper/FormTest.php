@@ -37,9 +37,6 @@ class FormTest extends TestCase
      */
     protected $_experimentCodeMock;
 
-    /**
-     * @inheritdoc
-     */
     protected function setUp(): void
     {
         $this->_formMock = $this->getMockBuilder(\Magento\Framework\Data\Form::class)
@@ -58,10 +55,7 @@ class FormTest extends TestCase
         $this->_helper = $objectManagerHelper->getObject(Form::class, $data);
     }
 
-    /**
-     * @return void
-     */
-    public function testAddFieldsWithExperimentCode(): void
+    public function testAddFieldsWithExperimentCode()
     {
         $experimentCode = 'some-code';
         $experimentCodeId = 'code-id';
@@ -84,25 +78,20 @@ class FormTest extends TestCase
         $this->_helper->addGoogleoptimizerFields($this->_formMock, $this->_experimentCodeMock);
     }
 
-    /**
-     * @return void
-     */
-    public function testAddFieldsWithoutExperimentCode(): void
+    public function testAddFieldsWithoutExperimentCode()
     {
         $experimentCode = '';
         $experimentCodeId = '';
         $this->_prepareFormMock($experimentCode, $experimentCodeId);
 
-        $this->_helper->addGoogleoptimizerFields($this->_formMock);
+        $this->_helper->addGoogleoptimizerFields($this->_formMock, null);
     }
 
     /**
      * @param string|array $experimentCode
      * @param string $experimentCodeId
-     *
-     * @return void
      */
-    protected function _prepareFormMock($experimentCode, $experimentCodeId): void
+    protected function _prepareFormMock($experimentCode, $experimentCodeId)
     {
         $this->_formMock->expects(
             $this->once()
@@ -115,32 +104,38 @@ class FormTest extends TestCase
             $this->_fieldsetMock
         );
 
-        $this->_fieldsetMock
-            ->method('addField')
-            ->withConsecutive(
-                [
-                    'experiment_script',
-                    'textarea',
-                    [
-                        'name' => 'experiment_script',
-                        'label' => 'Experiment Code',
-                        'value' => $experimentCode,
-                        'class' => 'textarea googleoptimizer',
-                        'required' => false,
-                        'note' => 'Experiment code should be added to the original page only.',
-                        'data-form-part' => '']
-                ],
-                [
-                    'code_id',
-                    'hidden',
-                    [
-                        'name' => 'code_id',
-                        'value' => $experimentCodeId,
-                        'required' => false,
-                        'data-form-part' => ''
-                    ]
-                ]
-            );
+        $this->_fieldsetMock->expects(
+            $this->at(0)
+        )->method(
+            'addField'
+        )->with(
+            'experiment_script',
+            'textarea',
+            [
+                'name' => 'experiment_script',
+                'label' => 'Experiment Code',
+                'value' => $experimentCode,
+                'class' => 'textarea googleoptimizer',
+                'required' => false,
+                'note' => 'Experiment code should be added to the original page only.',
+                'data-form-part' => ''
+            ]
+        );
+
+        $this->_fieldsetMock->expects(
+            $this->at(1)
+        )->method(
+            'addField'
+        )->with(
+            'code_id',
+            'hidden',
+            [
+                'name' => 'code_id',
+                'value' => $experimentCodeId,
+                'required' => false,
+                'data-form-part' => ''
+            ]
+        );
         $this->_formMock->expects($this->once())->method('setFieldNameSuffix')->with('google_experiment');
     }
 }
